@@ -84,7 +84,7 @@ class Twitch
 
         // We unset the searchUsers when found, if the array isn't empty yet, it doesn't exist
         if(!empty($aSearchUsers))
-            throw new Exception('User'. (count($aSearchUsers) == 1 ? '' : 's') .' not found:'. implode($aSearchUsers));
+            throw new Exception('User'. (count($aSearchUsers) == 1 ? '' : 's') .' not found:'. implode(', ', $aSearchUsers));
 
         return $aReturnUsers;
     }
