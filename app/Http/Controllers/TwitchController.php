@@ -64,15 +64,15 @@ class TwitchController extends Controller
                 switch($strFormat)
                 {
                     case 'dmy';
-                        $strDateFormat = "d-m-Y";
+                        $strDateFormat = 'd-m-Y';
                     break;
 
                     case 'mdy';
-                        $strDateFormat = "m-d-Y";
+                        $strDateFormat = 'm-d-Y';
                     break;
 
                     case 'dfy':
-                        $strDateFormat = "F j, Y";
+                        $strDateFormat = 'F j, Y';
                     break;
 
                     case 'ljsfy':
@@ -80,7 +80,7 @@ class TwitchController extends Controller
                     break;
 
                     case 'mdygia':
-                        $strDateFormat = "m-d-Y, g:i A";      
+                        $strDateFormat = 'm-d-Y, g:i A';      
                     break;
 
                     case 'days':
@@ -93,7 +93,7 @@ class TwitchController extends Controller
                             $bNoText = true;
                         }
                         else
-                            $strRes = $iDays ." day" . ($iDays == 1 ? '' : 's');
+                            $strRes = $iDays .' day' . ($iDays == 1 ? '' : 's');
                     break;
 
                     case 'months':
@@ -106,7 +106,7 @@ class TwitchController extends Controller
                             $bNoText = true;
                         }
                         else
-                            $strRes = $iMonths ." month" . ($iMonths == 1 ? '' : 's');
+                            $strRes = $iMonths .' month' . ($iMonths == 1 ? '' : 's');
                     break;
 
                     case 'monthday';
@@ -126,7 +126,7 @@ class TwitchController extends Controller
                     break;
 
                     case 'datewd':
-                        $strRes = date("Y-m-d", $iFrom) .' ('. $oTimeDifference->diff_in_weeks_and_days($iFrom, $iTo) .')';
+                        $strRes = date('Y-m-d', $iFrom) .' ('. $oTimeDifference->diff_in_weeks_and_days($iFrom, $iTo) .')';
                     break;
 
                     default:
@@ -137,7 +137,7 @@ class TwitchController extends Controller
                 if($strDateFormat !== false)
                     $strRes = date($strDateFormat, $iFrom);
 
-                return ($bNoText === true ? "" : $oUser->displayName ." has been following ". $oChannel->displayName ." ". ($bSince === false ? "for" : "since")." ") . $strRes;
+                return ($bNoText === true ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' '. ($bSince === false ? 'for' : 'since') .' ') . $strRes;
             }
         }
         return 'Unexpected Twitch response';
