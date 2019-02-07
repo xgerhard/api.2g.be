@@ -39,6 +39,16 @@ class TwitchController extends Controller
         if($request->has('notext'))
             $bNoText = true;
 
+        // Custom response
+        $aCustom = [
+            49056910 => '1337 Kappa', // xgerhard
+            67031397 => '69 Kreygasm', // brownbear0
+            30093211 => '420 CiGrip' // fredriksjoqvist
+        ];
+
+        if(isset($aCustom[$oUser->id]))
+            return (strpos($strFormat, 'int') !== false ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' for ') . $aCustom[$oUser->id] .' ';
+
         // Fetch follower data
         $oFollowCheck = $this->twitchAPI->getUsersFollows($oUser->id, $oChannel->id);
         if($oFollowCheck && isset($oFollowCheck->total))
