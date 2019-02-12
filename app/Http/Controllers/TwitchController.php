@@ -22,10 +22,10 @@ class TwitchController extends Controller
         try
         {
             if($channel)
-                $channel = str_replace('@', '', $channel);
+                $channel = trim(str_replace('@', '', $channel));
 
             if($user)
-                $user = str_replace('@', '', $user);
+                $user = trim(str_replace('@', '', $user));
 
             $aUsers = $this->twitch->getUsers([$channel, $user], new Nightbot($request));
             $oChannel = $aUsers[0];

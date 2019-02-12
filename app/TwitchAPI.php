@@ -4,6 +4,7 @@ namespace App;
 
 use Exception;
 use GuzzleHttp\Client;
+use Log;
 
 class TwitchAPI
 {
@@ -93,11 +94,19 @@ class TwitchAPI
             'headers' => $aRequestHeaders
         ]);
 
-        $res = $oGuzzle->request('GET', $bFullUrl ? $strEndpoint : $this->baseUrl . $strEndpoint);
-        if($res->getStatusCode() == 200)
-            return json_decode($res->getBody());
-        else
-            throw new Exception('Unexpected Twitch response');
+        try
+        {
+            $res = $oGuzzle->request('GET', $bFullUrl ? $strEndpoint : $this->baseUrl . $strEndpoint);
+            if($res->getStatusCode() == 200)
+                return json_decode($res->getBody());
+            else
+                throw new Exception('Unexpected Twitch response');
+        }
+        catch(\GuzzleHttp\Exception\ClientException $e)
+        {
+            Log::error($e);
+            throw new Exception('Twitch error, please try again later');            
+        }
     }
 }
 ?>

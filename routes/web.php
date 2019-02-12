@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'twitch'], function()
 {
-    $strNameRegex = '([$A-z0-9@]{1,50})';
+    $strNameRegex = '([$A-z0-9@ ]{1,50})';
 
     Route::get('/', function() { echo 'Twitch'; });
 
