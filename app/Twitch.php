@@ -78,7 +78,7 @@ class Twitch
             {
                 foreach($oUserSearch->users as $oUser)
                 {
-                    $i = array_search($oUser->name, $aSearchUsers); 
+                    $i = array_search($oUser->name, $aSearchUsers);
                     $aReturnUsers[$i] = (object) [
                         'id' => $oUser->_id,
                         'name' => $oUser->name,
