@@ -18,6 +18,7 @@ class Twitch
     public function getUsers($aUsers = [], $oNightbot = null)
     {
         $aReturnUsers = [];
+        $aSearchUsers = [];
         if(!empty($aUsers))
         {
             $aNightbotUser = $oNightbot->getUser();
@@ -78,7 +79,7 @@ class Twitch
             {
                 foreach($oUserSearch->users as $oUser)
                 {
-                    $i = array_search($oUser->name, $aSearchUsers);
+                    $i = array_search(strtolower($oUser->name), array_map('strtolower', $aSearchUsers));
                     $aReturnUsers[$i] = (object) [
                         'id' => $oUser->_id,
                         'name' => $oUser->name,
