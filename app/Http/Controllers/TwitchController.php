@@ -22,10 +22,80 @@ class TwitchController extends Controller
         try
         {
             if($channel)
-                $channel = trim(str_replace('@', '', $channel));
+            {
+                $channel = preg_replace("/[^a-zA-Z\d_]+/i", "", urldecode($channel));
+                if(strlen($channel) > 25)
+                    return 'Error: Invalid channel';
+            }
 
             if($user)
-                $user = trim(str_replace('@', '', $user));
+            {
+                $user = preg_replace("/[^a-zA-Z\d_]+/i", "", urldecode($user));
+                if(strlen($user) > 25)
+                    return 'Error: Invalid user';
+            }
+
+            // Set date format
+            $strFormat = 'd-m-Y H:i:s';
+            if($request->has('format'))
+            {
+                $strFormat = $request->get('format');
+                if(is_string($strFormat))
+                {
+                    $strFormat = urldecode($strFormat);
+                    if($strFormat != 'mwdhms') // Since 99% of the commands use this
+                    {
+                        $strFormat = preg_replace("/[^a-z.\-\\\_: ()]+/i", "", $strFormat);
+                        if(trim($strFormat) == "" || strlen(str_replace(" ", "", $strFormat)) > 15)
+                            return 'Error: Invalid date format';
+                        else
+                        {
+                            // Whooo lets write a repeater check & skip text out
+                            $iMaxRepeat = 3;
+                            $aTempDate = [];
+                            $strTempDate = '';
+                            $bSkip = false;
+
+                            foreach(str_split($strFormat) as $s)
+                            {
+                                if($bSkip == true)
+                                {
+                                    $bSkip = false;
+                                    continue;
+                                }
+                                elseif($s == '\\')
+                                {
+                                    $bSkip = true;
+                                    continue;
+                                }
+
+                                if(isset($aTempDate[$s]))
+                                {
+                                    $aTempDate[$s]++;
+                                    if($aTempDate[$s] > $iMaxRepeat)
+                                        continue;
+                                }
+                                else
+                                    $aTempDate[$s] = 1;
+
+                                $strTempDate .= $s;
+                            }
+
+                            if(trim($strTempDate) == '')
+                                return 'Error: Invalid date format';
+
+                            $strFormat = $strTempDate;
+                        }
+                    }
+                }
+                else
+                    return 'Error: Invalid date format';
+            }
+
+            // We dont want users to set the format field
+            $strQuerystring = trim($_SERVER['QUERY_STRING']);
+            if($strQuerystring != "" && substr_count(strtolower($strQuerystring), 'format') > 1)
+                return 'Error: Invalid request';
 
             $aUsers = $this->twitch->getUsers([$channel, $user], new Nightbot($request));
             $oChannel = $aUsers[0];
@@ -33,15 +103,10 @@ class TwitchController extends Controller
             $oTimeDifference = new TimeDifference;
             $bSince = true; // follow since or for
 
-            // Set date format
-            $strFormat = 'd-m-Y H:i:s';
-            if($request->has('format'))
-                $strFormat = $request->get('format');
-
             // Set timezone
             $strTimezone = 'UTC';
-            if($request->has('timezone') && $oTimeDifference->isValidTimezone($request->get('timezone')))
-                $strTimezone = $request->get('timezone');
+            if($request->has('timezone') && $oTimeDifference->isValidTimezone(urldecode($request->get('timezone'))))
+                $strTimezone = urldecode($request->get('timezone'));
 
             // No leading text
             $bNoText = false;
@@ -50,6 +115,7 @@ class TwitchController extends Controller
 
             // Custom response
             $aCustom = [
+                // 187982262 = ChickenNuggetz_
                 49056910 => '1337 Kappa', // xgerhard
                 67031397 => '69 Kreygasm', // brownbear0
                 30093211 => '420 CiGrip' // fredriksjoqvist
@@ -57,6 +123,8 @@ class TwitchController extends Controller
 
             if(isset($aCustom[$oUser->id]))
                 return (strpos($strFormat, 'int') !== false ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' for ') . $aCustom[$oUser->id] .' ';
+            elseif($oUser->id == 166810102) // 5UCC
+                $strFormat = 'l';
 
             // Fetch follower data
             $oFollowCheck = $this->twitchAPI->getUsersFollows($oUser->id, $oChannel->id);
@@ -146,7 +214,7 @@ class TwitchController extends Controller
                     if($strDateFormat !== false)
                         $strRes = date($strDateFormat, $iFrom);
 
-                    return ($bNoText === true ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' '. ($bSince === false ? 'for' : 'since') .' ') . $strRes;
+                    return ($bNoText === true ? '' : $oUser->displayName .' has '. ($oUser->id == 187982262 ? 'not ': '') .'been following '. $oChannel->displayName .' '. ($bSince === false ? 'for' : 'since') .' ') . $strRes;
                 }
             }
             else

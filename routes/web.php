@@ -17,11 +17,7 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'twitch'], function()
 {
-    $strNameRegex = '([$A-z0-9@ ]{1,50})';
-
     Route::get('/', function() { echo 'Twitch'; });
 
-    Route::get('followage/{channel?}/{user?}', 'TwitchController@followAge')
-        ->where('channel', $strNameRegex)
-        ->where('user', $strNameRegex);
+    Route::get('followage/{channel?}/{user?}', 'TwitchController@followAge');
 });
