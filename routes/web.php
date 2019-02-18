@@ -18,6 +18,11 @@ Route::get('/', function () {
 Route::group(['prefix' => 'twitch'], function()
 {
     Route::get('/', function() { echo 'Twitch'; });
-
     Route::get('followage/{channel?}/{user?}', 'TwitchController@followAge');
+});
+
+Route::group(['prefix' => 'games'], function()
+{
+    Route::get('/', function() { echo 'Games'; });
+    Route::get('apex', ['uses' => 'GamesController@run', 'game' => 'apex']);
 });
