@@ -24,5 +24,6 @@ Route::group(['prefix' => 'twitch'], function()
 Route::group(['prefix' => 'games'], function()
 {
     Route::get('/', function() { echo 'Games'; });
+    Route::get('apex/info', function() { return view('apex.info'); });
     Route::get('apex', ['uses' => 'GamesController@run', 'game' => 'apex']);
 });
