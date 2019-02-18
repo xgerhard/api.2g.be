@@ -7,6 +7,7 @@ use xgerhard\nbheaders\Nightbot;
 use Exception;
 use App\Twitch;
 use App\Apex;
+use Log;
 
 class GamesController extends Controller
 {
@@ -46,22 +47,31 @@ class GamesController extends Controller
 
     public function run()
     {
-        switch($this->game)
+        try
         {
-            case 'apex';
-                $oApex = new Apex;
-                return $this->formatText($oApex->get(
-                    isset($this->action) ? $this->action : 'info',
-                    isset($this->user) ? $this->user : null,
-                    isset($this->platform) ? $this->platform : (isset($this->default_platform) ? $this->default_platform : null)
-                ));
-            break;
+            switch($this->game)
+            {
+
+                case 'apex';
+                    $oApex = new Apex;
+                    return $this->formatText($oApex->get(
+                        isset($this->action) ? $this->action : 'info',
+                        isset($this->user) ? $this->user : null,
+                        isset($this->platform) ? $this->platform : (isset($this->default_platform) ? $this->default_platform : null)
+                    ));
+                break;
+            }
+        }
+        catch(Exception $e)
+        {
+            Log::error($e);
+            return $e->getMessage();         
         }
     }
 
     private function formatText($strRes)
     {
-        if(rand(0,1) == 0)
+        if(rand(0,3) == 0)
             $strRes .= ' ['. $this->games[$this->game]['title'] .' ❤]';
 
         return substr($strRes, 0, 400);

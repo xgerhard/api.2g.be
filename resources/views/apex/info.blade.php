@@ -1,9 +1,9 @@
-Nightbot copy-paste:
+<b>Nightbot copy-paste:</b>
 <pre>
 !commands add !apex @$(user): $(urlfetch https://api.2g.be/games/apex?q=$(querystring))
 </pre>
 
-Available commands:
+<b>Available commands:</b>
 <ul>
     <li>stats - !apex stats {user} {platform} <i>- example: gerhardoh: [Level: 36 | Kills: 142 | Damage: 45,748]</i></li>
 </ul>
