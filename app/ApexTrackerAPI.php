@@ -5,6 +5,7 @@ namespace App;
 use Exception;
 use Cache;
 use GuzzleHttp\Client;
+use Log;
 
 class ApexTrackerAPI
 {
