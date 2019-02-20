@@ -12,7 +12,7 @@ class Apex
     {
         if($strPlayer && $strPlatform)
         {
-            $aPlatforms = ['ps' => 1, 'xbox' => 2, 'pc' => 5];
+            $aPlatforms = ['ps' => 2, 'xbox' => 1, 'pc' => 5];
             $oAPI = new ApexTrackerAPI;
             $oPlayer = $oAPI->getPlayer($strPlayer, $aPlatforms[$strPlatform]);
             if(!$oPlayer || !isset($oPlayer->data))

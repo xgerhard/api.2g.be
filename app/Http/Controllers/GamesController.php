@@ -41,7 +41,7 @@ class GamesController extends Controller
                 $this->platform = $this->isValidConsole(array_pop($aQuery));
 
             if(!empty($aQuery))
-                $this->user = implode($aQuery);
+                $this->user = implode(' ', $aQuery);
         }
     }
 
