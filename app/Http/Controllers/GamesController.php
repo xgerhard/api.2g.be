@@ -51,7 +51,6 @@ class GamesController extends Controller
         {
             switch($this->game)
             {
-
                 case 'apex';
                     $oApex = new Apex;
                     return $this->formatText($oApex->get(
