@@ -22,7 +22,9 @@ class Apex
                 $oAPI = new ApexTrackerAPI;
                 $oPlayer = $oAPI->getPlayer($strPlayer, $aPlatforms[$strPlatform]);
 
-                if(!$oPlayer || !isset($oPlayer->data))
+                if($oPlayer && isset($oPlayer->error))
+                    return 'Error: '. $oPlayer->error; 
+                else if(!$oPlayer || !isset($oPlayer->data))
                     return 'Player: '. $strPlayer .' not found';
                 else
                     Cache::put($strCacheKey, $this->dataCleaner($oPlayer), 5);
