@@ -5,6 +5,7 @@ namespace App;
 use Exception;
 use GuzzleHttp\Client;
 use Log;
+use App\OAuth\OAuthHandler;
 
 class TwitchAPI
 {
@@ -36,7 +37,19 @@ class TwitchAPI
         if($iFirst)
             $a['first'] = $iFirst;
 
-        return $this->request('users/follows?' . http_build_query($a));
+        // Move this later, since the API is getting slammed with rate limit errors, lets quick fix this..
+        $aRequestHeaders = [];
+        $oOAuthHandler = new OAuthHandler('twitch');
+        $oOAuthSession = $oOAuthHandler->isAuthValid(null, true);
+
+        if($oOAuthSession)
+            $aRequestHeaders['Authorization'] = 'Bearer '. $oOAuthSession->access_token;
+
+        return $this->request(
+            'users/follows?' . http_build_query($a),
+            false,
+            $aRequestHeaders
+        );
     }
 
     /**
@@ -98,7 +111,15 @@ class TwitchAPI
         {
             $res = $oGuzzle->request('GET', $bFullUrl ? $strEndpoint : $this->baseUrl . $strEndpoint);
             if($res->getStatusCode() == 200)
+            {
+                if(isset($res->getHeader('Ratelimit-Remaining')[0]) && $res->getHeader('Ratelimit-Remaining')[0] == 0)
+                {
+                    Log::error('Twitch rate limit reached');
+                    throw new Exception('please try again later');
+                }
+
                 return json_decode($res->getBody());
+            }
             else
                 throw new Exception('Unexpected Twitch response');
         }
