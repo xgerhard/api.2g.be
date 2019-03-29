@@ -8,7 +8,7 @@ use Cache;
 
 class Twitch
 {
-    private $userCacheLength = 86400;
+    private $userCacheLength = 1440;
 
     public function __construct()
     {
