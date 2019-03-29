@@ -10,6 +10,7 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('/oauth/{service}', 'OAuthController@OAuthHandler');
 
 Route::get('/', function () {
     return view('welcome');
