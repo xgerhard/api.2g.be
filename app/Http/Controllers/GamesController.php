@@ -7,19 +7,45 @@ use xgerhard\nbheaders\Nightbot;
 use Exception;
 use App\Twitch;
 use App\Apex;
+use App\LeagueOfLegends;
 use Log;
 
 class GamesController extends Controller
 {
-    public $game;
-    public $action;
-    public $user;
     public $games = [
         'apex' => [
-            'query' => ['action', 'user', 'platform'],
+            'query' => ['action', 'user.fill', 'platform'],
             'title' => 'apex.tracker.gg'
+        ],
+        'LeagueOfLegends' => [
+            'query' => ['action', 'summoner.fill', 'region']
         ]
     ];
+
+    private function parseQuery($aQuery, $aPattern, $bReverse = false)
+    {
+        foreach($aPattern as $iPosition => $strPattern)
+        {
+            if(!empty($aQuery) && isset($aQuery[$iPosition]))
+            {
+                if(strpos($strPattern, '.fill') !== false)
+                {
+                    // If reversed and reached the end, merge all the values that are left to fill the .fill parameter
+                    if($bReverse)
+                        $this->{str_replace('.fill', '', $strPattern)} = implode(' ', array_reverse($aQuery));
+
+                    break;
+                }
+
+                if($strValue = $this->filterPass($strPattern, $aQuery[$iPosition]))
+                {
+                    $this->{$strPattern} = $strValue;
+                    unset($aQuery[$iPosition]);
+                }
+            }
+        }
+        return $aQuery;
+    }
 
     public function __construct(Request $request)
     {
@@ -28,20 +54,20 @@ class GamesController extends Controller
         else
             throw new Exception('invalid route');
 
-        if($request->has('q'))
+        if($request->has('q') && isset($this->games[$this->game]['query']))
         {
-            $strQuery = trim($request->get('q'));
-            $aQuery = explode(' ', $strQuery);
-            $aQuery = array_diff($aQuery, array(''));
+            $aQuery = explode(' ', trim($request->get('q')));
+            $aQuery = array_values(array_diff($aQuery, ['']));
+            $aPattern = $this->games[$this->game]['query'];
 
-            if(!empty($aQuery))
-                $this->action = strtolower(trim(array_shift($aQuery)));
-
-            if(!empty($aQuery) && $this->isValidConsole(end($aQuery)))
-                $this->platform = $this->isValidConsole(array_pop($aQuery));
-
-            if(!empty($aQuery))
-                $this->user = implode(' ', $aQuery);
+            // Use the pattern set in $this->games to parse the query
+            $this->parseQuery(
+                array_reverse(
+                    $this->parseQuery($aQuery, $aPattern)
+                ),
+                array_reverse($aPattern),
+                true
+            );
         }
     }
 
@@ -59,6 +85,15 @@ class GamesController extends Controller
                         isset($this->platform) ? $this->platform : (isset($this->default_platform) ? $this->default_platform : null)
                     ));
                 break;
+
+                case 'LeagueOfLegends':
+                    $oLoL = new LeagueOfLegends;
+                    return $this->formatText($oLoL->get(
+                        isset($this->action) ? $this->action : 'info',
+                        isset($this->summoner) ? $this->summoner : null,
+                        isset($this->region) ? $this->region : (isset($this->default_region) ? $this->default_region : null)
+                    ));
+                break;
             }
         }
         catch(Exception $e)
@@ -70,26 +105,42 @@ class GamesController extends Controller
 
     private function formatText($strRes)
     {
-        if(rand(0,3) == 0)
+        if(rand(0,3) == 0 && isset($this->games[$this->game]['title']))
             $strRes .= ' ['. $this->games[$this->game]['title'] .' ❤]';
 
         return substr($strRes, 0, 400);
     }
 
-    public function isValidConsole($strConsole)
+    public function filterPass($strKey, $strValue)
 	{
-        $strConsole = trim(strtolower($strConsole));
-        $a = array(
-            'xbox' => array('xbl', 'xbox', 'xb1'),
-            'ps' => array('ps', 'playstation', 'ps4'),
-            'pc' => array('pc', 'origin')
-        );
-
-        foreach($a as $strConsoleKey => $aConsoles)
+        switch($strKey)
         {
-            if(in_array($strConsole, $aConsoles))
-                return $strConsoleKey;
+            case 'region':
+                $strValue = trim(strtolower($strValue));
+                $aRegions = ['br', 'eune', 'euw', 'lan', 'na', 'oce', 'ru', 'tr', 'jp', 'sea', 'kr', 'cn', 'pbe'];
+
+                if(in_array($strValue, $aRegions))
+                    return $strValue;
+                else
+                    return false;
+            break;
+
+            case 'platform':
+                $strValue = trim(strtolower($strValue));
+                $a = [
+                    'xbox' => ['xbl', 'xbox', 'xb1'],
+                    'ps' => ['ps', 'playstation', 'ps4'],
+                    'pc' => ['pc', 'origin']
+                ];
+
+                foreach($a as $strConsoleKey => $aConsoles)
+                {
+                    if(in_array($strValue, $aConsoles))
+                        return $strConsoleKey;
+                }
+                return false;
+            break;
         }
-        return false;
-	}
+        return $strValue;
+    }
 }
