@@ -2,6 +2,7 @@
 
 namespace App;
 
+use xgerhard\nbheaders\nbheaders;
 use App\TwitchAPI;
 use Exception;
 use Cache;
@@ -15,21 +16,22 @@ class Twitch
         $this->twitchAPI = new TwitchAPI;
     }
 
-    public function getUsers($aUsers = [], $oNightbot = null)
+    public function getUsers($aUsers = [])
     {
         $aReturnUsers = [];
         $aSearchUsers = [];
         if(!empty($aUsers))
         {
-            $aNightbotUser = $oNightbot->getUser();
-            if($aNightbotUser)
+            $oNBheaders = new nbheaders();
+            $oNightbotUser = $oNBheaders->getUser();
+            if($oNightbotUser)
             {
-                if($aNightbotUser['provider'] == 'twitch')
+                if($oNightbotUser->provider == 'twitch')
                 {
                     $oUser = (object) [
-                        'id' => $aNightbotUser['providerId'],
-                        'name' => $aNightbotUser['name'],
-                        'displayName' => $aNightbotUser['displayName']
+                        'id' => $oNightbotUser->providerId,
+                        'name' => $oNightbotUser->name,
+                        'displayName' => $oNightbotUser->displayName
                     ];
                     Cache::put('twitch-users-'. strtolower($oUser->name), $oUser, $this->userCacheLength);
 
@@ -39,16 +41,16 @@ class Twitch
                 }
                 // In case the user isn't from Twitch, we can still search his username, they might be the same on the other platform
                 elseif(array_key_exists(1, $aUsers) && !$aUsers[1])
-                    $aUsers[1] = $aNightbotUser['displayName'];
+                    $aUsers[1] = $oNightbotUser->displayName;
             }
 
-            $aNighbotChannel = $oNightbot->getChannel();
-            if($aNighbotChannel && $aNighbotChannel['provider'] == 'twitch')
+            $oNighbotChannel = $oNBheaders->getChannel();
+            if($oNighbotChannel && $oNighbotChannel->provider == 'twitch')
             {
                 $oUser = (object) [
-                    'id' => $aNighbotChannel['providerId'],
-                    'name' => $aNighbotChannel['name'],
-                    'displayName' => $aNighbotChannel['displayName']
+                    'id' => $oNighbotChannel->providerId,
+                    'name' => $oNighbotChannel->name,
+                    'displayName' => $oNighbotChannel->displayName
                 ];
                 Cache::put('twitch-users-'. strtolower($oUser->name), $oUser, $this->userCacheLength);
 

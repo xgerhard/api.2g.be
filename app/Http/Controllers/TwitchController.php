@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\TwitchAPI;
 use App\Twitch;
-use xgerhard\nbheaders\Nightbot;
 use App\helpers\TimeDifference;
 use Exception;
 
@@ -23,14 +22,14 @@ class TwitchController extends Controller
         {
             if($channel)
             {
-                $channel = preg_replace("/[^a-zA-Z\d_]+/i", "", urldecode($channel));
+                $channel = preg_replace('/[^a-zA-Z\d_]+/i', '', urldecode($channel));
                 if(strlen($channel) > 25)
                     return 'Error: Invalid channel';
             }
 
             if($user)
             {
-                $user = preg_replace("/[^a-zA-Z\d_]+/i", "", urldecode($user));
+                $user = preg_replace('/[^a-zA-Z\d_]+/i', '', urldecode($user));
                 if(strlen($user) > 25)
                     return 'Error: Invalid user';
             }
@@ -45,8 +44,8 @@ class TwitchController extends Controller
                     $strFormat = urldecode($strFormat);
                     if($strFormat != 'mwdhms') // Since 99% of the commands use this
                     {
-                        $strFormat = preg_replace("/[^a-z.\-\\\_: ()]+/i", "", $strFormat);
-                        if(trim($strFormat) == "" || strlen(str_replace(" ", "", $strFormat)) > 15)
+                        $strFormat = preg_replace('/[^a-z.\-\\\_: ()]+/i', '', $strFormat);
+                        if(trim($strFormat) == '' || strlen(str_replace(' ', '', $strFormat)) > 15)
                             return 'Error: Invalid date format';
                         else
                         {
@@ -93,11 +92,10 @@ class TwitchController extends Controller
             }
 
             // We dont want users to set the format field
-            $strQuerystring = trim($_SERVER['QUERY_STRING']);
-            if($strQuerystring != "" && substr_count(strtolower($strQuerystring), 'format') > 1)
+            if(isset($_SERVER['QUERY_STRING']) && substr_count(strtolower($_SERVER['QUERY_STRING']), 'format') > 1)
                 return 'Error: Invalid request';
 
-            $aUsers = $this->twitch->getUsers([$channel, $user], new Nightbot($request));
+            $aUsers = $this->twitch->getUsers([$channel, $user]);
             $oChannel = $aUsers[0];
             $oUser = $aUsers[1];
             $oTimeDifference = new TimeDifference;
@@ -222,6 +220,7 @@ class TwitchController extends Controller
         }
         catch(Exception $e)
         {
+            dd($e);
             return 'Error: '. $e->getMessage() .'.';
         }
 
