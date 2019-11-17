@@ -220,9 +220,73 @@ class TwitchController extends Controller
         }
         catch(Exception $e)
         {
-            dd($e);
             return 'Error: '. $e->getMessage() .'.';
         }
+    }
 
+    public function recentFollower(Request $request, $channel = null, $user = null)
+    {
+        try
+        {
+            if($channel)
+            {
+                $channel = preg_replace('/[^a-zA-Z\d_]+/i', '', urldecode($channel));
+                if(strlen($channel) > 25)
+                    return 'Error: Invalid channel';
+            }
+
+            $aUsers = $this->twitch->getUsers([$channel]);
+            $oChannel = $aUsers[0];
+
+            // Defaults
+            $bRecentFollower = true;
+            $iFirst = 1;
+
+            // Pick random followe from latest x results
+            if($request->has('x'))
+            {
+                $bRecentFollower = false;
+                $iFirst = (int) $request->get('x');
+ 
+                // Min & max
+                if($iFirst == 0)
+                    $iFirst = 1;
+                elseif($iFirst > 100)
+                    $iFirst = 100;
+            }
+            // How many users to return
+            elseif($request->has('count'))
+            {
+                $iFirst = (int) $request->get('count');
+
+                // Min & max
+                if($iFirst == 0)
+                    $iFirst = 1;
+                if($iFirst > 25)
+                    $iFirst = 25;
+            }
+
+            // Fetch channel data
+            $oFollowers = $this->twitchAPI->getUsersFollows(null, $oChannel->id, null, $iFirst);
+            if(isset($oFollowers->data) && !empty($oFollowers->data))
+            {
+                if($bRecentFollower)
+			    {
+                    $aDisplayFollowers = [];
+                    foreach(array_slice($oFollowers->data, 0, $iFirst) as $oFollower)
+                        $aDisplayFollowers[] = $oFollower->from_name;
+
+                    return implode(', ', $aDisplayFollowers);
+                }
+                else
+                    return $oFollowers->data[array_rand($oFollowers->data)]->from_name;
+            }
+            else
+                return 'No followers to pick';
+        }
+        catch(Exception $e)
+        {
+            return 'Error: '. $e->getMessage() .'.';
+        }
     }
 }

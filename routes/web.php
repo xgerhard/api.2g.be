@@ -20,6 +20,7 @@ Route::group(['prefix' => 'twitch'], function()
 {
     Route::get('/', function() { echo 'Twitch'; });
     Route::get('followage/{channel?}/{user?}', 'TwitchController@followAge');
+    Route::get('recentfollower/{channel?}', 'TwitchController@recentFollower');
 });
 
 Route::group(['prefix' => 'games'], function()
