@@ -120,7 +120,7 @@ class TwitchController extends Controller
             ];
 
             if(isset($aCustom[$oUser->id]))
-                return (strpos($strFormat, 'int') !== false ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' for ') . $aCustom[$oUser->id] .' ';
+                return (strpos($strFormat, 'int') !== false ? '' : $oUser->displayName .' has been following '. $oChannel->displayName .' since ') . $aCustom[$oUser->id] .' ';
             elseif($oUser->id == 166810102) // 5UCC
                 $strFormat = 'l';
 
