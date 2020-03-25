@@ -9,8 +9,7 @@ use App\OAuth\OAuthHandler;
 
 class TwitchAPI
 {
-    private $baseUrl = 'https://api.twitch.tv/helix/';
-    private $v5 = 'application/vnd.twitchtv.v5+json';
+    private $baseUrl = 'https://api.twitch.tv/';
 
     /**
      * Get users follows
@@ -37,18 +36,10 @@ class TwitchAPI
         if($iFirst)
             $a['first'] = $iFirst;
 
-        // Move this later, since the API is getting slammed with rate limit errors, lets quick fix this..
-        $aRequestHeaders = [];
-        $oOAuthHandler = new OAuthHandler('twitch');
-        $oOAuthSession = $oOAuthHandler->isAuthValid(null, true);
-
-        if($oOAuthSession)
-            $aRequestHeaders['Authorization'] = 'Bearer '. $oOAuthSession->access_token;
-
         return $this->request(
+            'helix',
             'users/follows?' . http_build_query($a),
-            false,
-            $aRequestHeaders
+            false
         );
     }
 
@@ -62,9 +53,9 @@ class TwitchAPI
     public function searchUsers($aSearchUsers)
     {
         return $this->request(
-            'https://api.twitch.tv/kraken/users?login='. urlencode(implode(',', $aSearchUsers)),
-            true,
-            ['Accept' => $this->v5]
+            'kraken',
+            'users?login='. urlencode(implode(',', $aSearchUsers)),
+            false
         );
     }
 
@@ -78,6 +69,7 @@ class TwitchAPI
     public function getChatters($strChannel)
     {
         return $this->request(
+            'tmi',
             'https://tmi.twitch.tv/group/user/'. strtolower($strChannel) .'/chatters',
             true
         );
@@ -92,24 +84,41 @@ class TwitchAPI
      *
      * @return json Twitch data response
      */
-    private function request($strEndpoint, $bFullUrl = false, $aHeaders = [])
+    private function request($strVersion, $strEndpoint, $bFullUrl = false, $aHeaders = [])
     {
         $aRequestHeaders = [
             'Client-ID' => ENV('TWITCH_CLIENT_ID')
         ];
 
-        if(!empty($aHeaders))
-            $aRequestHeaders = array_merge($aRequestHeaders, $aHeaders);
+        switch($strVersion)
+        {
+            case 'helix':
+                if(!$bFullUrl)
+                    $strUrl = $this->baseUrl .'helix/';
+
+                // Since all Helix requests require a bearer now
+                $oOAuthHandler = new OAuthHandler('twitch');
+                $oOAuthSession = $oOAuthHandler->isAuthValid(null, true);
+
+                if($oOAuthSession)
+                    $aRequestHeaders['Authorization'] = 'Bearer '. $oOAuthSession->access_token; 
+            break;
+
+            case 'kraken':
+                if(!$bFullUrl)
+                    $strUrl = $this->baseUrl .'kraken/';
+
+                $aRequestHeaders['Accept'] = 'application/vnd.twitchtv.v5+json';
+            break;
+        }
 
         $oGuzzle = new Client([
-            //'http_errors' => false, 
-            'verify' => false,
-            'headers' => $aRequestHeaders
+            'headers' => !empty($aHeaders) ? array_merge($aRequestHeaders, $aHeaders) : $aRequestHeaders
         ]);
 
         try
         {
-            $res = $oGuzzle->request('GET', $bFullUrl ? $strEndpoint : $this->baseUrl . $strEndpoint);
+            $res = $oGuzzle->request('GET', $bFullUrl ? $strEndpoint : $strUrl . $strEndpoint);
             if($res->getStatusCode() == 200)
             {
                 if(isset($res->getHeader('Ratelimit-Remaining')[0]) && $res->getHeader('Ratelimit-Remaining')[0] == 0)
