@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use xgerhard\nbheaders\Nightbot;
 use Exception;
 use App\Twitch;
-use App\Apex;
 use Log;
 
 class GamesController extends Controller
@@ -18,6 +17,10 @@ class GamesController extends Controller
         'apex' => [
             'query' => ['action', 'user', 'platform'],
             'title' => 'apex.tracker.gg'
+        ],
+        'splitgate' => [
+            'query' => ['action', 'user', 'platform'],
+            'title' => 'tracker.gg/splitgate'
         ]
     ];
 
@@ -51,9 +54,11 @@ class GamesController extends Controller
         {
             switch($this->game)
             {
+                case 'splitgate':
                 case 'apex';
-                    $oApex = new Apex;
-                    return $this->formatText($oApex->get(
+                    $strGame = '\App\\'. ucfirst($this->game);
+                    $oGame = new $strGame;
+                    return $this->formatText($oGame->get(
                         isset($this->action) ? $this->action : 'info',
                         isset($this->user) ? $this->user : null,
                         isset($this->platform) ? $this->platform : (isset($this->default_platform) ? $this->default_platform : null)
@@ -63,6 +68,7 @@ class GamesController extends Controller
         }
         catch(Exception $e)
         {
+            dd($e);
             Log::error($e);
             return $e->getMessage();         
         }
