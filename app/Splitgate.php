@@ -200,7 +200,7 @@ class Splitgate
                         $oStat->displayValue = $this->formatData($oStat->value, $oStat->displayType);
                     }
 
-                    if($aUnwantedFields)
+                    if(!empty($aUnwantedFields))
                     {
                         foreach($aUnwantedFields as $strUnwantedField)
                         {
