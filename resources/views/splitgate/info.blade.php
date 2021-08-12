@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>Splitgate command generator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -11,6 +12,17 @@
             <form id="generator" action="">
 
                 <h1>Splitgate command generator</h1>
+                <p>
+                    Hi there! 👋 This generator will generate an url which you can use inside your streaming chat commands.<br/>
+                    Splitgate data is provided by our friends at <a href="https://tracker.gg/splitgate" target="blank">https://tracker.gg/splitgate</a> ❤️.
+                </p>
+                <p>
+                    <b>Note:</b> This project is still in development, more playlists & stats will be added later.<br/>
+                    Most likely there will be bugs and errors, please report them, so they can be fixed.<br/><br/>
+                    Create an issue here: <a href="https://github.com/xgerhard/api.2g.be/issues" target="blank">https://github.com/xgerhard/api.2g.be/issues</a><br/>
+                    or say hi to me at <a href="https://twitter.com/gerhardoh" target="blank">https://twitter.com/gerhardoh</a>.
+                </p>
+                <hr>
 
                 <div class="tab">User info:
                     <p><input name="username" placeholder="Username / Steam ID" oninput="this.className = ''"></p>
