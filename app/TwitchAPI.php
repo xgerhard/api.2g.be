@@ -52,9 +52,16 @@ class TwitchAPI
      */
     public function searchUsers($aSearchUsers)
     {
+        $strPath = '';;
+        foreach($aSearchUsers as $strSearhUser)
+        {
+            $strPath .= 'login='. urlencode($strSearhUser) .'&';
+        }
+        $strPath = substr($strPath, 0, -1);
+
         return $this->request(
-            'kraken',
-            'users?login='. urlencode(implode(',', $aSearchUsers)),
+            'helix',
+            'users?'. $strPath,
             false
         );
     }

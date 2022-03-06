@@ -77,18 +77,18 @@ class Twitch
         if(!empty($aSearchUsers))
         {
             $oUserSearch = $this->twitchAPI->searchUsers($aSearchUsers);
-            if($oUserSearch && $oUserSearch->_total > 0)
+            if(isset($oUserSearch->data) && count($oUserSearch->data) > 0)
             {
-                foreach($oUserSearch->users as $oUser)
+                foreach($oUserSearch->data as $oUser)
                 {
-                    $i = array_search(strtolower($oUser->name), array_map('strtolower', $aSearchUsers));
+                    $i = array_search(strtolower($oUser->login), array_map('strtolower', $aSearchUsers));
                     $aReturnUsers[$i] = (object) [
-                        'id' => $oUser->_id,
-                        'name' => $oUser->name,
+                        'id' => $oUser->id,
+                        'name' => $oUser->login,
                         'displayName' => $oUser->display_name
                     ];
 
-                    Cache::put('twitch-users-'. strtolower($oUser->name), $aReturnUsers[$i], $this->userCacheLength);
+                    Cache::put('twitch-users-'. strtolower($oUser->login), $aReturnUsers[$i], $this->userCacheLength);
                     unset($aSearchUsers[$i]);
                 }
             }
