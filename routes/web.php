@@ -28,4 +28,6 @@ Route::group(['prefix' => 'games'], function()
     Route::get('/', function() { echo 'Games'; });
     Route::get('apex/info', function() { return view('apex.info'); });
     Route::get('apex', ['uses' => 'GamesController@run', 'game' => 'apex']);
+    Route::get('splitgate/info', function() { return view('splitgate.info'); });
+    Route::get('splitgate', ['uses' => 'GamesController@run', 'game' => 'splitgate']);
 });
